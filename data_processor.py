@@ -26,6 +26,8 @@ def clean_data(data):
     return data
 
 def process_data(data, filter_column, threshold):
+    
+    threshold = float(threshold)
     # Filter data (example)
     filtered_data = data[data[filter_column] > threshold]
     # Perform calculations (example)
@@ -53,11 +55,11 @@ def main():
         #save transformed data into a new csv_file
         processed_data.to_csv(my_args.output_file, index= False)
         
-        printf("Data Processing complete. Saved under {my_args.output_file}")
+        print(f"Data Processing complete. Saved under {my_args.output_file}")
         
 """ To ensure that the main() function only runs when run directly
 and Not when imported as a module in another python program """
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     main()
 
