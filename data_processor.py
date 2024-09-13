@@ -25,3 +25,12 @@ def clean_data(data):
     data['Date']= pd.to_datetime(data['Date'])
     return data
 
+def process_data(data, filter_column, threshold):
+    # Filter data (example)
+    filtered_data = data[data[filter_column] > threshold]
+    # Perform calculations (example)
+    filtered_data['Total_Sales'] = filtered_data['Quantity'] * filtered_data['Price']
+    # Group and aggregate (example)
+    aggregated_data = filtered_data.groupby('Month').sum()
+    return aggregated_data
+
