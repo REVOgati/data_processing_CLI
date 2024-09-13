@@ -1,10 +1,20 @@
-# Ignore virtual environment
+# Ignore virtual environment folders
 venv/
+my_py_env/
+my_py_venv/
+
+# Ignore Python cache files
 __pycache__/
 *.pyc
+
+# Ignore macOS specific files
 .DS_Store
+
+# Ignore environment variable files
 .env
+
+# Ignore build and distribution directories
 *.egg-info/
 dist/
 build/
-my_py_env/
+
