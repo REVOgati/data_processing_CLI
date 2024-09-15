@@ -3,47 +3,54 @@
 import pandas as pd
 import argparse
 
-# : Function to read csv file and convert to dataframe
-
+# Function to read CSV file and convert to dataframe
 def read_csv_file(file_path):
     try:
         data = pd.read_csv(file_path)
         return data
     except FileNotFoundError:
-        print("File could not be Found")
+        print("File could not be found")
         return None
 
-#Cleaning data
-
+# Function to clean data
 def clean_data(data):
-    #-- Handling missing values
-    data = data.dropna()
-    # -- remove duplicates
-    data = data.drop_duplicates()
+    # Check the number of rows with missing values
+    rows_with_missing_values = data.isnull().any(axis=1).sum()
     
-    # -- converting Date column to date datatype
-    data['Date']= pd.to_datetime(data['Date'])
+    # If more than 10% of rows have missing values, fill with mode
+    if rows_with_missing_values > 0.1 * data.shape[0]:
+        # Fill missing values with the mode of each column
+        for column in data.columns:
+            mode_value = data[column].mode()[0]  # Get the mode of the column
+            data[column].fillna(mode_value, inplace=True)  # Fill missing values with mode
+        print("Filled missing values with mode.")
+    
+    # Otherwise, drop rows with missing values
+    else:
+        data = data.dropna()
+        print("Dropped rows with missing values.")
+    
+    # Remove duplicates
+    data = data.drop_duplicates()
+    print("Removed duplicate rows.")
+    
+    # Convert 'Date' column to datetime type if present
+    possible_date_columns = ['DATE', 'Date', 'date']
+    date_column = next((col for col in possible_date_columns if col in data.columns), None)
+    
+    if date_column:
+        data[date_column] = pd.to_datetime(data[date_column])
+        print(f"Converted '{date_column}' column to datetime.")
+    else:
+        print('No Date column in this dataset.')
+
     return data
 
-def process_data(data, filter_column, threshold):
-    
-    threshold = float(threshold)
-    # Filter data (example)
-    filtered_data = data[data[filter_column] > threshold]
-    # Perform calculations (example)
-    filtered_data['Total_Sales'] = filtered_data['Quantity'] * filtered_data['Price']
-    # Group and aggregate (example)
-    aggregated_data = filtered_data.groupby('Month').sum()
-    return aggregated_data
-
-#Using argparse to enable user input in CLI
-
+# Using argparse to enable user input in CLI
 def main():
-    my_parser = argparse.ArgumentParser(description= "Data Cleaning and Processing Tool")
-    my_parser.add_argument('input_file', help= "Path to input CSV file")
+    my_parser = argparse.ArgumentParser(description="Data Cleaning and Processing Tool")
+    my_parser.add_argument('input_file', help="Path to input CSV file")
     my_parser.add_argument('output_file', help="Path to save output file")
-    my_parser.add_argument('--filter_column', help='Option to define filter column', default=None)
-    my_parser.add_argument('--threshold', help='Option for threshhold', default= 0)
     
     my_args = my_parser.parse_args()
     
@@ -51,15 +58,12 @@ def main():
     
     if data is not None:
         cleaned_data = clean_data(data)
-        processed_data = process_data(cleaned_data, my_args.filter_column, my_args.threshold)
-        #save transformed data into a new csv_file
-        processed_data.to_csv(my_args.output_file, index= False)
         
-        print(f"Data Processing complete. Saved under {my_args.output_file}")
+        # Save transformed data into a new CSV file
+        cleaned_data.to_csv(my_args.output_file, index=False)
         
-""" To ensure that the main() function only runs when run directly
-and Not when imported as a module in another python program """
+        print(f"Data cleaning complete. Saved under {my_args.output_file}")
 
+# To ensure that the main() function only runs when run directly
 if __name__ == "__main__":
     main()
-
